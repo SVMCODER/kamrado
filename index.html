@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GKP RENTALS</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+      <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700&display=swap" rel="stylesheet">
+  <meta name="theme" content="#332ffd">
+
+    <link rel="shortcut icon" href="logo.img" type="image/x-icon" />
+
+    <meta name="description" content="KAMRADO - A room booking app">
+    <meta name="keywords" content="room booking, hotel booking, accommodation, KAMRADO, gorakhpur, gkp rooms, rooms in gorakhpur, gorakhpur book, gorakhpur india, uttar pradesh, gorakhpur me rooms">
+    <meta name="author" content="KAMRADO INDIA">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="logo.png" type="image/png">
+
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#332FFD"
+>
+
+</head>
+<body > 
+<div class="container" id="container" align="center">
+ 
+  <div class="ccc">Welcome To</div>
+  <div class="title">KAMRADO INDIA</div>
+   <div class="sp" align="center">
+    <div class="spin"></div>
+  </div>
+ <div class="vkd" align="center">
+    <div class="tx" align="center">Founded by Kasha Group</div>
+ </div>
+ 
+</div>
+<div id="toast-container"></div>
+    <style>
+    .vkd {
+      text-align: center;
+      display:flex;
+      justify-content: center;
+    }
+    .sp {
+      margin-top:30px;}
+        #btx:disabled {
+            background: #3c39fd;
+        }
+        .ccc {
+          text-align:left;
+          font-size: 18px;
+          color: lightgrey;
+        }
+/* Toast Notification */
+#toast-container {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+}
+.spin {
+  width: 50px;
+  height:50px;
+ 
+  border: 4px solid;
+  border-color: darkgrey;
+  border-top-color: #332ffd;
+  margin-bottom:30px;
+  border-radius: 50%;
+  
+  
+  animation: 1s spin linear infinite;
+}
+@keyframes spin {
+  0% {
+    rotate: 0deg;
+  }
+  100% {
+    rotate: 360deg;
+  }
+}
+.tx{
+  font-size: 20px;
+  position:fixed;
+  color: lightgrey;
+  text-align: center ;
+  justify-content:center;
+  bottom:50px;
+  center:0;
+}
+.toast {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 14px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.toast.show {
+  opacity: 1;
+}
+
+.toast-success {
+  background-color: #4caf50;
+}
+
+.toast-error {
+  background-color: #f44336;
+}
+
+.toast-info {
+  background-color: #2196f3;
+}
+
+.toast i {
+  margin-right: 8px;
+}
+
+        * {
+            margin: 0;
+            outline: none;
+            user-select: none;
+            -webkit-user-drag: none;
+            font-family: 'Archivo', sans-serif;
+        }
+     body {
+        height: 100vh; 
+        display: grid;
+        padding: 0;
+        place-content: center;
+        justify-content: center;
+        background: url(x.jpg);
+        background-repeat: no-repeat center;
+        
+     }
+
+.container {
+            text-align: center;
+            color: white;
+            
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 50px;
+        }
+
+        .login-button {
+            padding: 15px 40px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            
+            transition: 0.3s ease-in-out;
+        }
+
+        .login-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .login-button:active {
+            transform: scale(0.98);
+        }
+.sign-in_btn {
+  width: 100%;
+  height: 40px;
+  border: 0;
+  background: #332fff;
+  border-radius: 7px;
+  outline: none;
+  color: #ffffff;
+  
+}
+.sign-in_btn:hover {
+  width: 100%;
+  height: 40px;
+  border: 0;
+  background: #3c39fd;
+  border-radius: 7px;
+  outline: none;
+  color: #ffffff;
+  cursor: pointer:
+}
+
+    </style>
+<script src="app.js"></script>
+<script>
+  function checkAuth() {
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            // User is authenticated, redirect to home
+            window.location.href = "home.html";
+        } else {
+            // User is not authenticated, redirect to login
+            window.location.href = "login.html";
+        }
+    });
+}
+const messaging = firebase.messaging();
+
+        // Request notification permission automatically
+        function requestNotificationPermission() {
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    messaging.getToken().then(token => {
+                        db.collection("users").doc(token).set({ fcmToken: token });
+                        console.log("FCM Token stored:", token)
+                        showToast("doneee babayyy");
+                    }).catch(err => console.error("FCM Token Error:", err));
+                } else {
+                    console.warn("Notifications permission denied.");
+                }
+            }).catch(err => console.error("Permission Request Error:", err));
+        }
+
+        // Call function on page load
+        requestNotificationPermission();
+
+// Run the function when the page loads
+checkAuth()
+</script>
+</body>
+</html>
+
+

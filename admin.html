@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload & Notify</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7fc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        textarea {
+            resize: none;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            margin-top: 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Upload Data & Images</h2>
+        <form id="uploadForm">
+            <label>Rent:</label>
+            <input type="number" id="field1" required>
+
+            <label>Name:</label>
+            <input type="text" id="field2" required>
+
+            <label>Location:</label>
+            <input type="text" id="field3" required>
+
+            <label>ID:</label>
+            <input type="number" id="field4" required>
+
+            <label>Features:</label>
+            <textarea id="field5" required></textarea>
+
+            <label>Upload 4 Images:</label>
+            <input type="file" id="file1" accept="image/*" required>
+            <input type="file" id="file2" accept="image/*" required>
+            <input type="file" id="file3" accept="image/*" required>
+            <input type="file" id="file4" accept="image/*" required>
+
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <div class="container">
+        <h2>Send Message</h2>
+        <label>Title:</label>
+        <input type="text" id="title" required>
+
+        <label>Description:</label>
+        <textarea id="desc" required></textarea>
+
+        <button id="sendBtn">Send Notification</button>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCOA_2bf_b1o1nXSHZO5Re5DjSD66Pa6MY",
+            authDomain: "raona0.firebaseapp.com",
+            projectId: "raona0",
+            storageBucket: "raona0.appspot.com",
+            messagingSenderId: "797719983777",
+            appId: "1:797719983777:web:aa4490f3e9f6f435ec62e0"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
+        // Redirect if not logged in
+        auth.onAuthStateChanged(user => {
+            if (!user || user.email !== "admin@niggers.com") {
+                window.location.href = "index.html";
+            }
+        });
+
+        // Show Toast Message
+        function showToast(message, color = "#333") {
+            const toast = document.getElementById("toast");
+            toast.textContent = message;
+            toast.style.background = color;
+            toast.style.display = "block";
+
+            setTimeout(() => {
+                toast.style.display = "none";
+            }, 3000);
+        }
+
+        // Handle File Upload & Data Submission
+        document.getElementById("uploadForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const field1 = document.getElementById("field1").value.trim();
+            const field2 = document.getElementById("field2").value.trim();
+            const field3 = document.getElementById("field3").value.trim();
+            const field4 = document.getElementById("field4").value.trim();
+            const field5 = document.getElementById("field5").value.trim();
+            const files = [
+                document.getElementById("file1").files[0],
+                document.getElementById("file2").files[0],
+                document.getElementById("file3").files[0],
+                document.getElementById("file4").files[0]
+            ];
+
+            if (!field1 || !field2 || !field3 || !field4 || !field5 || files.includes(undefined)) {
+                showToast("Please fill all fields and upload 4 images!", "#d9534f");
+                return;
+            }
+
+            try {
+                let imageUrls = {};
+                const labels = ["a", "b", "c", "d"];
+                const uploadTasks = files.map(async (file, index) => {
+                    const storageRef = storage.ref().child(`images/${Date.now()}_${file.name}`);
+                    await storageRef.put(file);
+                    imageUrls[labels[index]] = await storageRef.getDownloadURL();
+                });
+
+                await Promise.all(uploadTasks);
+
+                await db.collection("listings").add({
+                    rent: field1,
+                    name: field2,
+                    location: field3,
+                    id: field4,
+                    features: field5,
+                    imageUrls,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                });
+
+                showToast("Upload successful!", "#28a745");
+                document.getElementById("uploadForm").reset();
+            } catch (error) {
+                console.error("Error uploading: ", error);
+                showToast("Upload failed. Try again!", "#d9534f");
+            }
+        });
+
+        // Send Notification
+        document.getElementById("sendBtn").addEventListener("click", async function() {
+            const title = document.getElementById("title").value.trim();
+            const desc = document.getElementById("desc").value.trim();
+
+            if (!title || !desc) {
+                showToast("Please fill all fields!", "#d9534f");
+                return;
+            }
+
+            try {
+                await db.collection("notifications").add({
+                    title,
+                    desc,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                });
+
+                showToast("Notification sent!", "#28a745");
+                document.getElementById("title").value = "";
+                document.getElementById("desc").value = "";
+            } catch (error) {
+                console.error("Error sending notification: ", error);
+                showToast("Failed to send notification!", "#d9534f");
+            }
+        });
+    </script>
+
+</body>
+</html>

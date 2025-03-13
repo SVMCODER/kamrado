@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+
+
+
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>GKP RENTALS</title>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+        <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+          <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+      <meta name="theme" content="#332ffd">
+
+    <link rel="shortcut icon" href="logo.img" type="image/x-icon" />
+
+    <meta name="description" content="KAMRADO - A room booking app">
+    <meta name="keywords" content="room booking, hotel booking, accommodation, KAMRADO, gorakhpur, gkp rooms, rooms in gorakhpur, gorakhpur book, gorakhpur india, uttar pradesh, gorakhpur me rooms">
+    <meta name="author" content="KAMRADO INDIA">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="logo.png" type="image/png">
+
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#332FFD"
+>
+
+    </head>
+<body>
+
+
+
+<div class="header">
+    <div class="main">
+      
+        <div class="jsks" style="display:flex;justify-content:space-evenly;">
+          <div onclick="nav('back')" class="fas fa-chevron-left" style="margin-right:10px;"></div>
+          <div class="title">My Account</div>
+        
+        </div>
+        <div class="logo fa fa-bell ncm" onclick="nav('noti')"></div>
+    </div>
+</div>                           
+
+
+<div class="content" style="margin-top:80px;">
+ 
+  
+  <div class="sl">
+    <h2 align="left">
+      Manage Profile
+    </h2>
+
+  
+  <div class="cxx">
+  <div class="cards" align="center" id="x">
+   
+     
+      
+       
+      
+      
+     
+    </div>
+    
+  </div>  
+  
+  <div class="warn">
+    <div class="mao">KAMRADO INDIA</div>
+    <div class="creds">PAPERLESS ROOM BOOKINGS</div>
+  </div>
+  
+  
+</div>
+
+<div class="bottom">
+  <div class="mx">
+  <div class="tab " style="text-align: center" onclick="nav('home')">
+      <div class=" ncm fas fa-home"></div>
+      <div class="txb">Home</div>
+  </div>
+    <div class="tab " style="text-align: center" onclick="nav('book')">
+
+      <div class="ncm fas fa-ticket-alt" ></div>
+
+      <div class="txb">Rooms</div>
+  </div>
+    
+  
+    <div class="tab ac" style="text-align: center">
+
+      <div class="fas fa-user"></div>
+
+      <div class="txb">Account</div>
+  </div>
+  
+  </div>
+</div>
+
+
+
+
+
+
+
+<script>
+const firebaseConfig = {
+
+    apiKey: "AIzaSyCOA_2bf_b1o1nXSHZO5Re5DjSD66Pa6MY",
+
+    authDomain: "raona0.firebaseapp.com",
+    projectId: "raona0",
+    storageBucket: "raona0.appspot.com",
+    messagingSenderId: "797719983777",
+    appId: "1:797719983777:web:aa4490f3e9f6f435ec62e0"
+};
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+const storage = firebase.storage();
+
+  function logout() {
+    showToast("signing out...", "info")
+    localStorage.clear();
+    localStorage.setItem("user","ee")
+    firebase.auth().signOut().then(() => {
+        
+        window.location.replace("index.html")
+        // Redirect or update UI after logout
+    }).catch((error) => {
+        console.error("Logout error:", error);
+    });
+}
+function formatTimestamp(timestamp) {
+    if (!timestamp || !timestamp.seconds) return "Unknown time"; // Handle invalid timestamps
+
+    const date = new Date(timestamp.seconds * 1000); // Convert Firestore timestamp to JS Date
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000); // Difference in seconds
+
+    if (diffInSeconds < 60) return "Just now"; // Less than 1 min
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60) return diffInMinutes + " min ago"; // Less than 1 hour
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return diffInHours + " hour" + (diffInHours > 1 ? "s" : "") + " ago"; // Less than 1 day
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays === 1) return "Yesterday"; // Exactly 1 day
+    if (diffInDays < 7) return diffInDays + " days ago"; // Less than a week
+    const diffInWeeks = Math.floor(diffInDays / 7);
+    if (diffInWeeks === 1) return "1 week ago";
+    if (diffInWeeks < 4) return diffInWeeks + " weeks ago"; // Less than a month
+    const diffInMonths = Math.floor(diffInDays / 30);
+    if (diffInMonths === 1) return "1 month ago";
+    if (diffInMonths < 12) return diffInMonths + " months ago"; // Less than a year
+    const diffInYears = Math.floor(diffInMonths / 12);
+    return diffInYears === 1 ? "1 year ago" : diffInYears + " years ago"; // More than a year
+}
+
+// Load Profile Data
+function loadProfile(user) {
+  document.getElementById("x").innerHTML = `
+
+    <div class="load">
+
+
+      <div class="dots">
+
+      <div class="dot"></div>  
+      <div class="dot"></div>
+      <div class="dot"></div>
+      </div>
+      <div class="text">Loading Your Profile</div>
+    </div>
+   `
+    const userRef = db.collection("users").doc(user.uid);
+
+    userRef.get().then(doc => {
+        if (doc.exists) {
+            const userData = doc.data();
+           
+            document.getElementById("x").innerHTML =`
+             
+
+    <div class="card" id="space">
+
+      
+         <div class="pfp">
+          <img src="user.png" id="profile-pic"> </div>
+        
+         <div class="cname" style="text-align: center;margin-top: 8px;font-weight:bold;" id="username">${userData.username}</div>
+         <div class="ctag" id="email">${userData.email}</div>
+         <div class="ctag" id="phone">Created- ${formatTimestamp(userData.createdAt)}</div>
+         
+        
+          <div class="cbtns" style="justify-content: space-evenly">
+           
+        <div class="cbtn no" style="background:red;color:white;" onclick="logout()">Logout</div>
+        
+      </div>
+
+      </div>
+      
+            `
+        }
+        else {
+          showToast("please login")
+        }
+    }).catch(error => {
+        console.error("Error loading profile:", error);
+        showToast(`Failed to load profile data. ${error}`, "error");
+    });
+}
+auth.onAuthStateChanged(user => {
+
+ 
+
+    if (user) {
+      localStorage.setItem("user", user.email)
+      loadProfile(user)
+    }
+    
+   
+}); 
+</script>
+
+    <div id="toast-container"></div>
+    <script >
+        // Toast Notification
+function showToast(message, type = 'success') {
+    const toastContainer = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.classList.add('toast', `toast-${type}`, 'show');
+    
+    // Icons for Toasts
+    let icon = '';
+    switch(type) {
+      case 'success':
+        icon = '<i class="fas fa-check-circle"></i>';
+        break;
+      case 'error':
+        icon = '<i class="fas fa-exclamation-circle"></i>';
+        break;
+      case 'info':
+        icon = '<i class="fas fa-info-circle"></i>';
+        break;
+    }
+    
+    toast.innerHTML = `${icon} ${message}`;
+    toastContainer.appendChild(toast);
+  
+    // Auto hide after 3 seconds
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 500);
+    }, 5000);
+  }
+
+
+    </script>
+   
+   
+       
+     <script  type="text/javascript" charset="utf-8">
+       
+       function nav(x) {
+  if(x == 'home') {
+    window.location.href = "home.html"
+  }
+  else if(x == 'fav') {
+    window.location.href = "liked.html"
+  }
+  else if(x == 'profile') {
+    window.location.href = "profile.html"
+  }
+  else if(x == 'back') {
+    window.location.back;
+  }
+  else if(x == 'book') {
+    window.location.href = "show.html"
+  }
+  else if (x== "noti") {
+    window.location.href = "noti.html"
+  }
+  
+}
+//SCROLL FUNCTIONALITY 
+
+function scroll(a,b,c,d) {
+  const img = document.getElementById("scroll")
+  img.src = a;
+  setTimeout(()=>{
+    img.src =b;
+    setTimeout(()=>{
+      img.src = c;
+      setTimeout(()=>{
+      img.src = d;
+      setTimeout(()=>{
+      scroll(a,b,c,d)
+    }, 3000)
+    }, 3000)
+    }, 3000)
+  }, 3000)
+}
+
+function up() {
+  
+  document.getElementById("cvk").classList.add("open")
+  document.getElementById("cvk").style.opacity = "1"
+  
+}
+
+     </script>
+</body>
+</html>

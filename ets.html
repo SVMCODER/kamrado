@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase CRUD Example</title>
+    <!-- Firebase SDKs CDN -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+</head>
+<body>
+    <h1>Firebase CRUD Operations</h1>
+
+    <!-- Buttons to trigger Firebase CRUD operations -->
+    <button onclick="createData()">Create Data</button>
+    <button onclick="fetchData()">Fetch Data</button>
+    <button onclick="updateData()">Update Data</button>
+    <button onclick="deleteData()">Delete Data</button>
+
+    <h3>Data:</h3>
+    <pre id="output"></pre>
+
+    <script>
+      // Firebase configuration
+      const firebaseConfig = {
+            apiKey: "AIzaSyCOA_2bf_b1o1nXSHZO5Re5DjSD66Pa6MY",
+            authDomain: "raona0.firebaseapp.com",
+            projectId: "raona0",
+            storageBucket: "raona0.appspot.com",
+            messagingSenderId: "797719983777",
+            appId: "1:797719983777:web:aa4490f3e9f6f435ec62e0"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Function to fetch data from Firestore (GET request)
+        function fetchData() {
+            db.collection("posts").get()
+                .then(snapshot => {
+                    let data = snapshot.docs.map(doc => doc.data());
+                    document.getElementById("output").textContent = JSON.stringify(data, null, 2);
+                })
+                .catch(error => {
+                    console.error("Error getting documents: ", error);
+                    alert("Error fetching data");
+                });
+        }
+
+        // Function to create new data in Firestore (POST request)
+        function createData() {
+            const newPost = {
+                title: "New Post",
+                body: "This is a new post created via Firebase Firestore.",
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            db.collection("posts").add(newPost)
+                .then(docRef => {
+                    console.log("Document written with ID: ", docRef.id);
+                    alert("Data Created!");
+                    fetchData(); // Refresh data
+                })
+                .catch(error => {
+                    console.error("Error adding document: ", error);
+                    alert("Error creating data");
+                });
+        }
+
+        // Function to update existing data in Firestore (PUT request)
+        function updateData() {
+            const postId = "POST_ID"; // Replace with the actual document ID to update
+            const updatedData = {
+                title: "Updated Post Title",
+                body: "This is an updated body of the post.",
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            db.collection("posts").doc(postId).update(updatedData)
+                .then(() => {
+                    console.log("Document successfully updated!");
+                    alert("Data Updated!");
+                    fetchData(); // Refresh data
+                })
+                .catch(error => {
+                    console.error("Error updating document: ", error);
+                    alert("Error updating data");
+                });
+        }
+
+        // Function to delete data from Firestore (DELETE request)
+        function deleteData() {
+            const postId = "POST_ID"; // Replace with the actual document ID to delete
+
+            db.collection("posts").doc(postId).delete()
+                .then(() => {
+                    console.log("Document successfully deleted!");
+                    alert("Data Deleted!");
+                    fetchData(); // Refresh data
+                })
+                .catch(error => {
+                    console.error("Error deleting document: ", error);
+                    alert("Error deleting data");
+                });
+        }
+    </script>
+</body>
+</html>

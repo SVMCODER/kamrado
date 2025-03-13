@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fingerprint Authentication</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #f4f4f4;
+            padding: 50px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin: auto;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        #status {
+            margin-top: 20px;
+            font-size: 14px;
+            color: green;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Fingerprint Authentication</h2>
+        <p>Click below to register or verify your fingerprint.</p>
+        <button onclick="registerFingerprint()">Register Fingerprint</button>
+        <button onclick="verifyFingerprint()">Verify Fingerprint</button>
+        <p id="status"></p>
+    </div>
+
+    <script>
+        async function registerFingerprint() {
+            if (!window.PublicKeyCredential) {
+                document.getElementById("status").innerText = "WebAuthn not supported.";
+                return;
+            }
+
+            try {
+                const publicKeyOptions = {
+                    challenge: new Uint8Array(32), // Random challenge
+                    rp: { name: "Your App" },
+                    user: {
+                        id: new Uint8Array(16),
+                        name: "user@example.com",
+                        displayName: "User Name"
+                    },
+                    pubKeyCredParams: [{ type: "public-key", alg: -7 }],
+                    authenticatorSelection: {
+                        authenticatorAttachment: "platform",
+                        requireResidentKey: true,  // Ensures the key is saved
+                        userVerification: "required"
+                    },
+                    timeout: 60000,
+                    attestation: "direct"
+                };
+
+                const credential = await navigator.credentials.create({ publicKey: publicKeyOptions });
+
+                if (credential) {
+                    localStorage.setItem("fingerprintKey", credential.id);
+                    document.getElementById("status").innerText = "Fingerprint registered successfully!";
+                }
+            } catch (error) {
+                console.error("Registration failed:", error);
+                document.getElementById("status").innerText = "Registration failed.";
+            }
+        }
+
+        async function verifyFingerprint() {
+            if (!window.PublicKeyCredential) {
+                document.getElementById("status").innerText = "WebAuthn not supported.";
+                return;
+            }
+
+            const savedCredentialId = localStorage.getItem("fingerprintKey");
+            if (!savedCredentialId) {
+                document.getElementById("status").innerText = "No fingerprint registered.";
+                return;
+            }
+
+            try {
+                const publicKeyOptions = {
+                    challenge: new Uint8Array(32), // Random challenge
+                    allowCredentials: [{
+                        id: Uint8Array.from(atob(savedCredentialId), c => c.charCodeAt(0)), // Convert stored ID
+                        type: "public-key",
+                        transports: ["internal"]
+                    }],
+                    timeout: 60000,
+                    userVerification: "required"
+                };
+
+                const credential = await navigator.credentials.get({ publicKey: publicKeyOptions });
+
+                if (credential) {
+                    document.getElementById("status").innerText = "Fingerprint verified successfully!";
+                }
+            } catch (error) {
+                console.error("Verification failed:", error);
+                document.getElementById("status").innerText = "Verification failed.";
+            }
+        }
+    </script>
+
+</body>
+</html>
