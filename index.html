@@ -10,7 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-      <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js"></script>
+      
     <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700&display=swap" rel="stylesheet">
   <meta name="theme" content="#332ffd">
 
@@ -215,25 +215,6 @@
         }
     });
 }
-const messaging = firebase.messaging();
-
-        // Request notification permission automatically
-        function requestNotificationPermission() {
-            Notification.requestPermission().then(permission => {
-                if (permission === "granted") {
-                    messaging.getToken().then(token => {
-                        db.collection("users").doc(token).set({ fcmToken: token });
-                        console.log("FCM Token stored:", token)
-                        showToast("doneee babayyy");
-                    }).catch(err => console.error("FCM Token Error:", err));
-                } else {
-                    console.warn("Notifications permission denied.");
-                }
-            }).catch(err => console.error("Permission Request Error:", err));
-        }
-
-        // Call function on page load
-        requestNotificationPermission();
 
 // Run the function when the page loads
 checkAuth()
